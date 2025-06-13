@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SMESA - Sistema de Matrícula</title>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      background-color: #fff;
+      border: 1px solid #007BFF;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #007BFF;
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    input[readonly] {
+      background-color: #f5f5f5;
+    }
+    button {
+      margin-top: 2rem;
+      width: 100%;
+      padding: 1rem;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .hidden {
+      display: none;
+    }
+    .confirmacao {
+      text-align: center;
+      padding: 2rem;
+      background-color: #e6f7ff;
+      border: 2px solid #007BFF;
+      border-radius: 10px;
+      margin-top: 2rem;
+    }
+    .confirmacao h3 {
+      color: #007BFF;
+      margin-bottom: 1rem;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 2rem;
+    }
+    .input-group {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .hint-message {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 105%;
+      transform: translateY(-50%);
+      background-color: #e6f7ff;
+      border: 1px solid #007BFF;
+      padding: 10px;
+      border-radius: 5px;
+      width: 220px;
+      font-size: 0.9rem;
+      color: #333;
+      z-index: 10;
+    }
+    .input-group:focus-within .hint-message {
+      display: block;
+    }
+
+    /* ESTILOS ADMINISTRATIVOS */
+    .admin-header {
+      background: linear-gradient(135deg, #007BFF, #0056b3);
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .admin-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .nav-btn {
+      padding: 0.5rem 1rem;
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: auto;
+      margin: 0;
+    }
+    .nav-btn.active {
+      background-color: #007BFF;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: white;
+      border: 2px solid #007BFF;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #007BFF;
+    }
+    .stat-label {
+      color: #666;
+      margin-top: 0.5rem;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    .data-table th, .data-table td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    .data-table th {
+      background-color: #007BFF;
+      color: white;
+    }
+    .data-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .status-pendente {
+      background-color: #fff3cd;
+      color: #856404;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+    .status-aprovado {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+    .status-rejeitado {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+    .action-btn {
+      padding: 5px 10px;
+      margin: 2px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      width: auto;
+    }
+    .btn-aprovar {
+      background-color: #28a745;
+      color: white;
+    }
+    .btn-rejeitar {
+      background-color: #dc3545;
+      color: white;
+    }
+    .btn-visualizar {
+      background-color: #17a2b8;
+      color: white;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 600px;
+      max-height: 80%;
+      overflow-y: auto;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: black;
+    }
+    .admin-logout {
+      background-color: #dc3545;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      width: auto;
+      margin: 0;
+    }
+    .admin-only {
+      border: 2px solid #28a745;
+      background-color: #f8fff8;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- CADASTRO -->
+  <div id="cadastroSection" class="hidden">
+    <h2>Cadastro de Novo Usuário</h2>
+    <form id="formCadastro">
+      <div class="input-group">
+        <label for="nomeCadastro">Nome Completo</label>
+        <input type="text" id="nomeCadastro" required pattern="\w+\s+\w+.*" placeholder="Ex: João da Silva">
+        <div class="hint-message">
+          Informe seu nome completo, com nome e sobrenome.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="cpfCadastro">CPF</label>
+        <input type="text" id="cpfCadastro" required placeholder="Somente números">
+        <div class="hint-message">
+          Digite seu CPF com 11 dígitos, sem pontos ou traços.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="emailCadastro">E-mail</label>
+        <input type="email" id="emailCadastro" required placeholder="exemplo@dominio.com">
+        <div class="hint-message">
+          Informe um e-mail válido para contato.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="senhaCadastro">Senha</label>
+        <input type="password" id="senhaCadastro" required>
+        <div class="hint-message">
+          Crie uma senha segura.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="telefoneCadastro">Telefone</label>
+        <input type="tel" id="telefoneCadastro" required pattern="[0-9]+" placeholder="Ex: 11987654321">
+        <div class="hint-message">
+          Informe somente números, incluindo DDD.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="cepCadastro">CEP</label>
+        <input type="text" id="cepCadastro" required pattern="[0-9]{8}" placeholder="Ex: 01001000" maxlength="8">
+        <div class="hint-message">
+          O CEP deve conter 8 dígitos numéricos.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="enderecoCadastro">Endereço</label>
+        <input type="text" id="enderecoCadastro" required>
+        <div class="hint-message">
+          Informe seu endereço completo.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="bairroCadastro">Bairro</label>
+        <input type="text" id="bairroCadastro" required>
+        <div class="hint-message">
+          Informe o seu bairro.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="estadoCadastro">Estado</label>
+        <input type="text" id="estadoCadastro" value="SP" readonly required>
+        <div class="hint-message">
+          Este campo é preenchido automaticamente.
+        </div>
+      </div>
+
+      <button type="submit">Cadastrar</button>
+      <button type="button" id="voltarLogin" style="margin-top: 1rem; background-color: #6c757d;">Voltar ao Login</button>
+    </form>
+  </div>
+
+  <div class="container">
+    <!-- LOGIN (sem dicas) -->
+    <div id="loginSection">
+      <h2>Login - SMESA</h2>
+      <form id="formLogin">
+        <label for="emailCpfLogin">E-mail ou CPF</label>
+        <input type="text" id="emailCpfLogin" required placeholder="Digite seu e-mail ou CPF">
+        <label for="senhaLogin">Senha</label>
+        <input type="password" id="senhaLogin" required placeholder="Digite sua senha">
+        
+        <div class="admin-only">
+          <strong>🔑 Acesso Administrativo:</strong><br>
+          Email: admin@smesa.com | Senha: admin123
+        </div>
+        
+        <p style="text-align: center; margin-top: 0.5rem;">
+          <a href="#" id="linkEsqueciSenha">Esqueci minha senha</a>
+        </p>
+        <p style="text-align: center; margin-top: 1rem;">
+          <a href="#" id="linkCadastro">Ainda não possui conta? Cadastre-se</a>
+        </p>
+        <button type="submit">Entrar</button>
+      </form>
+    </div>
+
+    <!-- PAINEL ADMINISTRATIVO -->
+    <div id="adminPanel" class="hidden">
+      <div class="admin-header">
+        <div>
+          <h2 style="margin: 0; color: white;">🏛️ Painel Administrativo - SMESA</h2>
+          <p style="margin: 0; opacity: 0.9;">Bem-vindo, Administrador</p>
+        </div>
+        <button class="admin-logout" onclick="logout()">Sair</button>
+      </div>
+
+      <div class="admin-nav">
+        <button class="nav-btn active" onclick="showAdminSection('dashboard')">📊 Dashboard</button>
+        <button class="nav-btn" onclick="showAdminSection('matriculas')">📋 Matrículas</button>
+        <button class="nav-btn" onclick="showAdminSection('creches')">🏫 Creches</button>
+        <button class="nav-btn" onclick="showAdminSection('usuarios')">👥 Usuários</button>
+        <button class="nav-btn" onclick="showAdminSection('relatorios')">📈 Relatórios</button>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="adminDashboard">
+        <h3>📊 Dashboard Geral</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="totalMatriculas">0</div>
+            <div class="stat-label">Total de Matrículas</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="matriculasPendentes">0</div>
+            <div class="stat-label">Matrículas Pendentes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="totalCreches">0</div>
+            <div class="stat-label">Creches Cadastradas</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="totalUsuarios">0</div>
+            <div class="stat-label">Usuários Cadastrados</div>
+          </div>
+        </div>
+
+        <h4>📋 Matrículas Recentes</h4>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Protocolo</th>
+              <th>Nome do Aluno</th>
+              <th>Responsável</th>
+              <th>Data</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="matriculasRecentes">
+            <!-- Dados serão inseridos dinamicamente -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- GERENCIAR MATRÍCULAS -->
+      <div id="adminMatriculas" class="hidden">
+        <h3>📋 Gerenciar Matrículas</h3>
+        <div style="margin-bottom: 1rem;">
+          <label for="filtroStatus">Filtrar por Status:</label>
+          <select id="filtroStatus" onchange="filtrarMatriculas()">
+            <option value="todos">Todos</option>
+            <option value="pendente">Pendentes</option>
+            <option value="aprovado">Aprovadas</option>
+            <option value="rejeitado">Rejeitadas</option>
+          </select>
+        </div>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Protocolo</th>
+              <th>Nome do Aluno</th>
+              <th>Responsável</th>
+              <th>Data Nascimento</th>
+              <th>Unidade Preferência</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="todasMatriculas">
+            <!-- Dados serão inseridos dinamicamente -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- GERENCIAR CRECHES -->
+      <div id="adminCreches" class="hidden">
+        <h3>🏫 Gerenciar Creches</h3>
+        <button onclick="abrirModalCreche()" style="width: auto; margin-bottom: 1rem; background-color: #28a745;">➕ Adicionar Nova Creche</button>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="totalVagas">0</div>
+            <div class="stat-label">Total de Vagas</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="vagasOcupadas">0</div>
+            <div class="stat-label">Vagas Ocupadas</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="vagasDisponiveis">0</div>
+            <div class="stat-label">Vagas Disponíveis</div>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nome da Creche</th>
+              <th>Endereço</th>
+              <th>Total de Vagas</th>
+              <th>Vagas Ocupadas</th>
+              <th>Vagas Disponíveis</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="listaCreches">
+            <!-- Dados serão inseridos dinamicamente -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- GERENCIAR USUÁRIOS -->
+      <div id="adminUsuarios" class="hidden">
+        <h3>👥 Gerenciar Usuários</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>CPF</th>
+              <th>Telefone</th>
+              <th>Data Cadastro</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="listaUsuarios">
+            <!-- Dados serão inseridos dinamicamente -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- RELATÓRIOS -->
+      <div id="adminRelatorios" class="hidden">
+        <h3>📈 Relatórios e Estatísticas</h3>
+        <div class="form-row">
+          <div>
+            <h4>Matrículas por Mês</h4>
+            <canvas id="graficoMatriculas" width="400" height="200"></canvas>
+          </div>
+          <div>
+            <h4>Status das Matrículas</h4>
+            <canvas id="graficoStatus" width="400" height="200"></canvas>
+          </div>
+        </div>
+        
+        <h4>Relatório Detalhado</h4>
+        <button onclick="gerarRelatorio()" style="width: auto; background-color: #28a745;">📊 Gerar Relatório PDF</button>
+        <button onclick="exportarDados()" style="width: auto; background-color: #17a2b8;">📤 Exportar Dados CSV</button>
+      </div>
+    </div>
+
+    <!-- TERMOS E CONDIÇÕES -->
+    <div id="termosSection" class="hidden">
+      <h2>Termos e Condições de Uso</h2>
+      <p>Este sistema coleta e armazena dados pessoais com o objetivo exclusivo de efetivar a matrícula escolar da criança. As informações fornecidas serão tratadas em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - LGPD), garantindo sigilo, segurança e uso adequado.</p>
+      <p>Ao prosseguir, você declara estar ciente e de acordo com o tratamento dos dados inseridos.</p>
+      <div class="input-group">
+        <input type="checkbox" id="aceiteTermos" />
+        <label for="aceiteTermos">Li e concordo com os termos.</label>
+        <div class="hint-message">
+          Marque para indicar que você concorda com os termos.
+        </div>
+      </div>
+      <button id="prosseguirMatricula">Prosseguir para o formulário</button>
+    </div>
+
+    <!-- MATRÍCULA -->
+    <form id="formMatricula" class="hidden" enctype="multipart/form-data">
+      <h2>Matrícula Escolar - SMESA</h2>
+
+      <!-- Dados do Responsável -->
+      <div class="input-group">
+        <label for="nomeCrianca">Nome do Responsável</label>
+        <input type="text" id="nomeCrianca" required pattern="\w+\s+\w+.*" placeholder="Ex: Maria Oliveira">
+        <div class="hint-message">
+          Informe o nome completo do responsável.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="dataNascimentoResponsavel">Data de Nascimento do Responsável</label>
+        <input type="date" id="dataNascimentoResponsavel" required>
+        <div class="hint-message">
+          Selecione a data de nascimento (dia de 1 a 31 e mês de 1 a 12).
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="cpfResponsavel">CPF do Responsável</label>
+        <input type="text" id="cpfResponsavel" required placeholder="Somente números" pattern="[0-9]{11}" maxlength="11">
+        <div class="hint-message">
+          Digite o CPF com 11 dígitos, sem pontos ou traços.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="emailResponsavel">E-mail</label>
+        <input type="email" id="emailResponsavel" required placeholder="exemplo@dominio.com">
+        <div class="hint-message">
+          Informe um e-mail válido.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="telefone">Telefone de Contato</label>
+        <input type="tel" id="telefone" required pattern="[0-9]+" placeholder="Ex: 11987654321">
+        <div class="hint-message">
+          Informe o telefone com DDD, apenas números.
+        </div>
+      </div>
+
+      <!-- Dados do Aluno -->
+      <div class="input-group">
+        <label for="nomeAluno">Nome do aluno(a)</label>
+        <input type="text" id="nomeAluno" required pattern="\w+\s+\w+.*" placeholder="Ex: João Oliveira">
+        <div class="hint-message">
+          Informe o nome completo do aluno.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="dataNascimentoAluno">Data de Nascimento do(a) aluno(a)</label>
+        <input type="date" id="dataNascimentoAluno" required>
+        <div class="hint-message">
+          Selecione a data de nascimento do aluno (a criança deve ter mais de 4 anos).
+        </div>
+      </div>
+
+      <!-- Documento do Aluno -->
+      <div class="input-group">
+        <label for="tipoDocumentoAluno">Tipo de Documento do(a) aluno(a)</label>
+        <select id="tipoDocumentoAluno" required>
+          <option value="">Selecione</option>
+          <option value="RG">RG</option>
+          <option value="CPF">CPF</option>
+        </select>
+        <div class="hint-message">
+          Selecione o tipo de documento.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="documentoAluno">Número do Documento do(a) aluno(a)</label>
+        <input type="text" id="documentoAluno" required placeholder="Informe o documento">
+        <div class="hint-message">
+          Digite o número do documento (somente números e tamanho correto).
+        </div>
+      </div>
+
+      <!-- CEP e Endereço -->
+      <div class="input-group">
+        <label for="cep">CEP</label>
+        <input type="text" id="cep" required pattern="[0-9]{8}" placeholder="Ex: 01001000" maxlength="8">
+        <div class="hint-message">
+          O CEP deve conter 8 dígitos numéricos.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="endereco">Endereço</label>
+        <input type="text" id="endereco" required placeholder="Digite o endereço">
+        <div class="hint-message">
+          Informe o endereço completo.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="bairro">Bairro</label>
+        <input type="text" id="bairro" required placeholder="Digite o bairro">
+        <div class="hint-message">
+          Informe o bairro.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="complemento">Número</label>
+        <input type="text" id="numero" placeholder="Ex: 123">
+        <div class="hint-message">
+          Informe o número da residência.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="complemento">Complemento</label>
+        <input type="text" id="complemento" required placeholder="Ex: Apto 101">
+        <div class="hint-message">
+          Informe o complemento, se houver.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="estado">Estado</label>
+        <input type="text" id="estado" value="SP" readonly required>
+        <div class="hint-message">
+          Este campo é preenchido automaticamente.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="pcd">O aluno possui algum tipo de deficiência?</label>
+        <select id="pcd" required onchange="document.getElementById('tipoPcd').classList.toggle('hidden', this.value !== 'Sim'); document.getElementById('descricaoPcd').required = this.value === 'Sim';">
+          <option value="">Selecione</option>
+          <option>Sim</option>
+          <option>Não</option>
+        </select>
+        <div class="hint-message">
+          Selecione "Sim" ou "Não".
+        </div>
+      </div>
+
+      <div id="tipoPcd" class="hidden input-group">
+        <label for="descricaoPcd">Se sim, qual?</label>
+        <textarea id="descricaoPcd" rows="2" required placeholder="Descreva a deficiência"></textarea>
+        <div class="hint-message">
+          Informe qual é a deficiência.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="renda">Renda Familiar Mensal</label>
+        <select id="renda" required>
+          <option value="">Selecione</option>
+          <option>Menos de um salário mínimo</option>
+          <option>Entre dois salários mínimos</option>
+          <option>Mais de três salários mínimos</option>
+        </select>
+        <div class="hint-message">
+          Selecione a faixa de renda familiar.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="vulnerabilidade">A família se encontra em situação de vulnerabilidade social?</label>
+        <select id="vulnerabilidade" required>
+          <option value="">Selecione</option>
+          <option>Sim</option>
+          <option>Não</option>
+        </select>
+        <div class="hint-message">
+          Selecione "Sim" ou "Não".
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="U1">Unidade I (Maior preferência)</label>
+        <select id="unidade1" required>
+          <option value="">Selecione a primeira preferência</option>
+        </select>
+        <div class="hint-message">
+          Escolha a primeira opção de creche.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="U2">Unidade II</label>
+        <select id="unidade2" required>
+          <option value="">Selecione a segunda preferência</option>
+        </select>
+        <div class="hint-message">
+          Escolha a segunda opção de creche.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="rg">RG (frente e verso)</label>
+        <input type="file" id="rg" accept=".pdf, .jpg, .jpeg, .png" required>
+        <div class="hint-message">
+          Anexe o RG em formato PDF ou imagem.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="certidao">Certidão de Nascimento</label>
+        <input type="file" id="certidao" accept=".pdf, .jpg, .jpeg, .png" required>
+        <div class="hint-message">
+          Anexe a certidão de nascimento.
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="comprovante">Comprovante de Residência</label>
+        <input type="file" id="comprovante" accept=".pdf, .jpg, .jpeg, .png" required>
+        <div class="hint-message">
+          Anexe o comprovante de residência.
+        </div>
+      </div>
+
+      <button type="submit">Enviar Matrícula</button>
+    </form>
+
+    <!-- RESUMO -->
+    <div id="resumoRespostas" class="hidden">
+      <h2>Resumo das Informações</h2>
+      <div id="resumoConteudo" style="margin-top: 1rem;"></div>
+      <button id="confirmarResumo">Confirmar e Enviar</button>
+      <button onclick="window.print()" style="margin-top: 1rem; background-color: #28a745;">Imprimir Resumo</button>
+    </div>
+
+    <!-- CONFIRMAÇÃO -->
+    <div class="confirmacao hidden" id="confirmacao">
+      <h3>Matrícula enviada com sucesso!</h3>
+      <p>Status atual: <strong>Em espera</strong>.</p>
+      <p>Você será informado por <strong>e-mail</strong> e <strong>WhatsApp</strong> assim que sua solicitação for analisada.</p>
+      <p>Protocolo de atendimento: <strong id="protocolo"></strong></p>
+    </div>
+
+    <!-- ESQUECI SENHA -->
+    <div id="esqueciSenhaSection" class="hidden">
+      <h2>Recuperar Senha</h2>
+      <form id="formEsqueciSenha">
+        <div class="input-group">
+          <label for="emailRecuperacao">E-mail cadastrado</label>
+          <input type="email" id="emailRecuperacao" required placeholder="Digite seu e-mail cadastrado">
+          <div class="hint-message">
+            Informe o e-mail utilizado no cadastro.
+          </div>
+        </div>
+        <button type="submit">Enviar link de recuperação</button>
+        <button type="button" id="voltarLoginSenha" style="margin-top: 1rem; background-color: #6c757d;">Voltar ao Login</button>
+      </form>
+    </div>
+
+    <footer>Sistema desenvolvido pelos alunos do CUFSA - 2025. <br>Todos os direitos reservados.</footer>
+  </div>
+
+  <!-- MODAL PARA DETALHES DA MATRÍCULA -->
+  <div id="modalMatricula" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModal('modalMatricula')">&times;</span>
+      <h3>Detalhes da Matrícula</h3>
+      <div id="detalhesMatricula"></div>
+      <div style="margin-top: 2rem;">
+        <button class="action-btn btn-aprovar" onclick="aprovarMatricula()">✅ Aprovar</button>
+        <button class="action-btn btn-rejeitar" onclick="rejeitarMatricula()">❌ Rejeitar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PARA CRECHE -->
+  <div id="modalCreche" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="fecharModal('modalCreche')">&times;</span>
+      <h3 id="tituloModalCreche">Adicionar Nova Creche</h3>
+      <form id="formCreche">
+        <div class="form-row">
+          <div>
+            <label for="nomeCreche">Nome da Creche</label>
+            <input type="text" id="nomeCreche" required>
+          </div>
+          <div>
+            <label for="cnpjCreche">CNPJ</label>
+            <input type="text" id="cnpjCreche" required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div>
+            <label for="enderecoCreche">Endereço</label>
+            <input type="text" id="enderecoCreche" required>
+          </div>
+          <div>
+            <label for="bairroCreche">Bairro</label>
+            <input type="text" id="bairroCreche" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label for="telefoneCreche">Telefone</label>
+            <input type="tel" id="telefoneCreche" required>
+          </div>
+          <div>
+            <label for="emailCreche">E-mail</label>
+            <input type="email" id="emailCreche" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label for="totalVagasCreche">Total de Vagas</label>
+            <input type="number" id="totalVagasCreche" required min="1">
+          </div>
+          <div>
+            <label for="vagasOcupadasCreche">Vagas Ocupadas</label>
+            <input type="number" id="vagasOcupadasCreche" required min="0">
+          </div>
+        </div>
+
+        <label for="observacoesCreche">Observações</label>
+        <textarea id="observacoesCreche" rows="3"></textarea>
+
+        <button type="submit" style="background-color: #28a745;">Salvar Creche</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Dados simulados para demonstração
+    let matriculas = [
+      {
+        protocolo: 'SMESA-1234567890',
+        nomeAluno: 'João Silva',
+        responsavel: 'Maria Silva',
+        dataNascimento: '2019-03-15',
+        unidadePreferencia: 'Creche Central',
+        status: 'pendente',
+        dataSubmissao: '2025-06-10',
+        dados: {
+          nomeResponsavel: 'Maria Silva',
+          cpfResponsavel: '12345678901',
+          emailResponsavel: 'maria@email.com',
+          telefone: '11987654321',
+          endereco: 'Rua das Flores, 123',
+          bairro: 'Centro',
+          vulnerabilidade: 'Não',
+          renda: 'Entre dois salários mínimos'
+        }
+      },
+      {
+        protocolo: 'SMESA-1234567891',
+        nomeAluno: 'Ana Santos',
+        responsavel: 'João Santos',
+        dataNascimento: '2020-07-22',
+        unidadePreferencia: 'Creche Norte',
+        status: 'aprovado',
+        dataSubmissao: '2025-06-08',
+        dados: {
+          nomeResponsavel: 'João Santos',
+          cpfResponsavel: '98765432109',
+          emailResponsavel: 'joao@email.com',
+          telefone: '11912345678',
+          endereco: 'Av. Principal, 456',
+          bairro: 'Vila Nova',
+          vulnerabilidade: 'Sim',
+          renda: 'Menos de um salário mínimo'
+        }
+      },
+      {
+        protocolo: 'SMESA-1234567892',
+        nomeAluno: 'Pedro Oliveira',
+        responsavel: 'Ana Oliveira',
+        dataNascimento: '2019-11-10',
+        unidadePreferencia: 'Creche Sul',
+        status: 'rejeitado',
+        dataSubmissao: '2025-06-05',
+        dados: {
+          nomeResponsavel: 'Ana Oliveira',
+          cpfResponsavel: '11122233344',
+          emailResponsavel: 'ana@email.com',
+          telefone: '11999888777',
+          endereco: 'Rua do Sol, 789',
+          bairro: 'Jardim Esperança',
+          vulnerabilidade: 'Não',
+          renda: 'Mais de três salários mínimos'
+        }
+      }
+    ];
+
+    let creches = [
+      {
+        id: 1,
+        nome: 'Creche Central',
+        cnpj: '12.345.678/0001-90',
+        endereco: 'Rua Central, 100',
+        bairro: 'Centro',
+        telefone: '11987654321',
+        email: 'central@creche.com',
+        totalVagas: 50,
+        vagasOcupadas: 35,
+        observacoes: 'Unidade principal com playground'
+      },
+      {
+        id: 2,
+        nome: 'Creche Norte',
+        cnpj: '98.765.432/0001-10',
+        endereco: 'Av. Norte, 200',
+        bairro: 'Vila Norte',
+        telefone: '11912345678',
+        email: 'norte@creche.com',
+        totalVagas: 40,
+        vagasOcupadas: 28,
+        observacoes: 'Especializada em educação inclusiva'
+      },
+      {
+        id: 3,
+        nome: 'Creche Sul',
+        cnpj: '11.222.333/0001-44',
+        endereco: 'Rua Sul, 300',
+        bairro: 'Jardim Sul',
+        telefone: '11999888777',
+        email: 'sul@creche.com',
+        totalVagas: 30,
+        vagasOcupadas: 25,
+        observacoes: 'Foco em atividades ao ar livre'
+      }
+    ];
+
+    let usuarios = [
+      {
+        nome: 'Maria Silva',
+        email: 'maria@email.com',
+        cpf: '12345678901',
+        telefone: '11987654321',
+        dataCadastro: '2025-05-15',
+        status: 'ativo'
+      },
+      {
+        nome: 'João Santos',
+        email: 'joao@email.com',
+        cpf: '98765432109',
+        telefone: '11912345678',
+        dataCadastro: '2025-05-20',
+        status: 'ativo'
+      },
+      {
+        nome: 'Ana Oliveira',
+        email: 'ana@email.com',
+        cpf: '11122233344',
+        telefone: '11999888777',
+        dataCadastro: '2025-05-25',
+        status: 'ativo'
+      }
+    ];
+
+    let matriculaSelecionada = null;
+    let isAdmin = false;
+
+    // Impedir Enter em inputs (exceto textarea)
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+      }
+    });
+
+    // Login
+    document.getElementById('formLogin').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('emailCpfLogin').value;
+      const senha = document.getElementById('senhaLogin').value;
+      
+      // Verificar se é admin
+      if (email === 'admin@smesa.com' && senha === 'admin123') {
+        isAdmin = true;
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        carregarDashboard();
+      } else {
+        // Login normal de usuário
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('termosSection').classList.remove('hidden');
+      }
+    });
+
+    // Função de logout
+    function logout() {
+      isAdmin = false;
+      document.getElementById('adminPanel').classList.add('hidden');
+      document.getElementById('loginSection').classList.remove('hidden');
+      document.getElementById('emailCpfLogin').value = '';
+      document.getElementById('senhaLogin').value = '';
+    }
+
+    // Navegação do painel admin
+    function showAdminSection(section) {
+      // Ocultar todas as seções
+      document.querySelectorAll('#adminPanel > div:not(.admin-header):not(.admin-nav)').forEach(div => {
+        div.classList.add('hidden');
+      });
+      
+      // Remover classe active de todos os botões
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Mostrar seção selecionada e ativar botão
+      document.getElementById('admin' + section.charAt(0).toUpperCase() + section.slice(1)).classList.remove('hidden');
+      event.target.classList.add('active');
+      
+      // Carregar dados específicos da seção
+      switch(section) {
+        case 'dashboard':
+          carregarDashboard();
+          break;
+        case 'matriculas':
+          carregarMatriculas();
+          break;
+        case 'creches':
+          carregarCreches();
+          break;
+        case 'usuarios':
+          carregarUsuarios();
+          break;
+        case 'relatorios':
+          carregarRelatorios();
+          break;
+      }
+    }
+
+    // Carregar Dashboard
+    function carregarDashboard() {
+      document.getElementById('totalMatriculas').textContent = matriculas.length;
+      document.getElementById('matriculasPendentes').textContent = matriculas.filter(m => m.status === 'pendente').length;
+      document.getElementById('totalCreches').textContent = creches.length;
+      document.getElementById('totalUsuarios').textContent = usuarios.length;
+      
+      // Carregar matrículas recentes
+      const tbody = document.getElementById('matriculasRecentes');
+      tbody.innerHTML = '';
+      
+      matriculas.slice(-5).reverse().forEach(matricula => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${matricula.protocolo}</td>
+          <td>${matricula.nomeAluno}</td>
+          <td>${matricula.responsavel}</td>
+          <td>${matricula.dataSubmissao}</td>
+          <td><span class="status-${matricula.status}">${matricula.status.toUpperCase()}</span></td>
+          <td>
+            <button class="action-btn btn-visualizar" onclick="visualizarMatricula('${matricula.protocolo}')">👁️ Ver</button>
+            ${matricula.status === 'pendente' ? `
+              <button class="action-btn btn-aprovar" onclick="aprovarMatriculaDireta('${matricula.protocolo}')">✅</button>
+              <button class="action-btn btn-rejeitar" onclick="rejeitarMatriculaDireta('${matricula.protocolo}')">❌</button>
+            ` : ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Carregar todas as matrículas
+    function carregarMatriculas() {
+      const tbody = document.getElementById('todasMatriculas');
+      tbody.innerHTML = '';
+      
+      matriculas.forEach(matricula => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${matricula.protocolo}</td>
+          <td>${matricula.nomeAluno}</td>
+          <td>${matricula.responsavel}</td>
+          <td>${matricula.dataNascimento}</td>
+          <td>${matricula.unidadePreferencia}</td>
+          <td><span class="status-${matricula.status}">${matricula.status.toUpperCase()}</span></td>
+          <td>
+            <button class="action-btn btn-visualizar" onclick="visualizarMatricula('${matricula.protocolo}')">👁️ Detalhes</button>
+            ${matricula.status === 'pendente' ? `
+              <button class="action-btn btn-aprovar" onclick="aprovarMatriculaDireta('${matricula.protocolo}')">✅ Aprovar</button>
+              <button class="action-btn btn-rejeitar" onclick="rejeitarMatriculaDireta('${matricula.protocolo}')">❌ Rejeitar</button>
+            ` : ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Filtrar matrículas
+    function filtrarMatriculas() {
+      const filtro = document.getElementById('filtroStatus').value;
+      const matriculasFiltradas = filtro === 'todos' ? matriculas : matriculas.filter(m => m.status === filtro);
+      
+      const tbody = document.getElementById('todasMatriculas');
+      tbody.innerHTML = '';
+      
+      matriculasFiltradas.forEach(matricula => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${matricula.protocolo}</td>
+          <td>${matricula.nomeAluno}</td>
+          <td>${matricula.responsavel}</td>
+          <td>${matricula.dataNascimento}</td>
+          <td>${matricula.unidadePreferencia}</td>
+          <td><span class="status-${matricula.status}">${matricula.status.toUpperCase()}</span></td>
+          <td>
+            <button class="action-btn btn-visualizar" onclick="visualizarMatricula('${matricula.protocolo}')">👁️ Detalhes</button>
+            ${matricula.status === 'pendente' ? `
+              <button class="action-btn btn-aprovar" onclick="aprovarMatriculaDireta('${matricula.protocolo}')">✅ Aprovar</button>
+              <button class="action-btn btn-rejeitar" onclick="rejeitarMatriculaDireta('${matricula.protocolo}')">❌ Rejeitar</button>
+            ` : ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Visualizar detalhes da matrícula
+    function visualizarMatricula(protocolo) {
+      const matricula = matriculas.find(m => m.protocolo === protocolo);
+      matriculaSelecionada = protocolo;
+      
+      const detalhes = `
+        <h4>Informações da Matrícula</h4>
+        <p><strong>Protocolo:</strong> ${matricula.protocolo}</p>
+        <p><strong>Status:</strong> <span class="status-${matricula.status}">${matricula.status.toUpperCase()}</span></p>
+        <p><strong>Data de Submissão:</strong> ${matricula.dataSubmissao}</p>
+        
+        <h4>Dados do Aluno</h4>
+        <p><strong>Nome:</strong> ${matricula.nomeAluno}</p>
+        <p><strong>Data de Nascimento:</strong> ${matricula.dataNascimento}</p>
+        <p><strong>Unidade de Preferência:</strong> ${matricula.unidadePreferencia}</p>
+        
+        <h4>Dados do Responsável</h4>
+        <p><strong>Nome:</strong> ${matricula.dados.nomeResponsavel}</p>
+        <p><strong>CPF:</strong> ${matricula.dados.cpfResponsavel}</p>
+        <p><strong>E-mail:</strong> ${matricula.dados.emailResponsavel}</p>
+        <p><strong>Telefone:</strong> ${matricula.dados.telefone}</p>
+        <p><strong>Endereço:</strong> ${matricula.dados.endereco}, ${matricula.dados.bairro}</p>
+        <p><strong>Renda Familiar:</strong> ${matricula.dados.renda}</p>
+        <p><strong>Vulnerabilidade Social:</strong> ${matricula.dados.vulnerabilidade}</p>
+      `;
+      
+      document.getElementById('detalhesMatricula').innerHTML = detalhes;
+      document.getElementById('modalMatricula').style.display = 'block';
+    }
+
+    // Aprovar matrícula
+    function aprovarMatricula() {
+      if (matriculaSelecionada) {
+        aprovarMatriculaDireta(matriculaSelecionada);
+        fecharModal('modalMatricula');
+      }
+    }
+
+    function aprovarMatriculaDireta(protocolo) {
+      const matricula = matriculas.find(m => m.protocolo === protocolo);
+      matricula.status = 'aprovado';
+      alert('Matrícula aprovada com sucesso!');
+      carregarDashboard();
+      carregarMatriculas();
+    }
+
+    // Rejeitar matrícula
+    function rejeitarMatricula() {
+      if (matriculaSelecionada) {
+        rejeitarMatriculaDireta(matriculaSelecionada);
+        fecharModal('modalMatricula');
+      }
+    }
+
+    function rejeitarMatriculaDireta(protocolo) {
+      const motivo = prompt('Informe o motivo da rejeição:');
+      if (motivo) {
+        const matricula = matriculas.find(m => m.protocolo === protocolo);
+        matricula.status = 'rejeitado';
+        matricula.motivoRejeicao = motivo;
+        alert('Matrícula rejeitada.');
+        carregarDashboard();
+        carregarMatriculas();
+      }
+    }
+
+    // Carregar creches
+    function carregarCreches() {
+      // Atualizar estatísticas
+      const totalVagas = creches.reduce((sum, c) => sum + c.totalVagas, 0);
+      const vagasOcupadas = creches.reduce((sum, c) => sum + c.vagasOcupadas, 0);
+      
+      document.getElementById('totalVagas').textContent = totalVagas;
+      document.getElementById('vagasOcupadas').textContent = vagasOcupadas;
+      document.getElementById('vagasDisponiveis').textContent = totalVagas - vagasOcupadas;
+      
+      // Carregar tabela
+      const tbody = document.getElementById('listaCreches');
+      tbody.innerHTML = '';
+      
+      creches.forEach(creche => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${creche.nome}</td>
+          <td>${creche.endereco}, ${creche.bairro}</td>
+          <td>${creche.totalVagas}</td>
+          <td>${creche.vagasOcupadas}</td>
+          <td>${creche.totalVagas - creche.vagasOcupadas}</td>
+          <td>
+            <button class="action-btn btn-visualizar" onclick="editarCreche(${creche.id})">✏️ Editar</button>
+            <button class="action-btn btn-rejeitar" onclick="excluirCreche(${creche.id})">🗑️ Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      
+      // Popular selects das unidades no formulário de matrícula
+      const select1 = document.getElementById('unidade1');
+      const select2 = document.getElementById('unidade2');
+      
+      if (select1 && select2) {
+        select1.innerHTML = '<option value="">Selecione a primeira preferência</option>';
+        select2.innerHTML = '<option value="">Selecione a segunda preferência</option>';
+        
+        creches.forEach(creche => {
+          select1.innerHTML += `<option value="${creche.nome}">${creche.nome}</option>`;
+          select2.innerHTML += `<option value="${creche.nome}">${creche.nome}</option>`;
+        });
+      }
+    }
+
+    // Abrir modal para adicionar/editar creche
+    function abrirModalCreche(id = null) {
+      if (id) {
+        const creche = creches.find(c => c.id === id);
+        document.getElementById('tituloModalCreche').textContent = 'Editar Creche';
+        document.getElementById('nomeCreche').value = creche.nome;
+        document.getElementById('cnpjCreche').value = creche.cnpj;
+        document.getElementById('enderecoCreche').value = creche.endereco;
+        document.getElementById('bairroCreche').value = creche.bairro;
+        document.getElementById('telefoneCreche').value = creche.telefone;
+        document.getElementById('emailCreche').value = creche.email;
+        document.getElementById('totalVagasCreche').value = creche.totalVagas;
+        document.getElementById('vagasOcupadasCreche').value = creche.vagasOcupadas;
+        document.getElementById('observacoesCreche').value = creche.observacoes;
+        document.getElementById('formCreche').dataset.id = id;
+      } else {
+        document.getElementById('tituloModalCreche').textContent = 'Adicionar Nova Creche';
+        document.getElementById('formCreche').reset();
+        delete document.getElementById('formCreche').dataset.id;
+      }
+      document.getElementById('modalCreche').style.display = 'block';
+    }
+
+    // Salvar creche
+    document.getElementById('formCreche').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const dadosCreche = {
+        nome: document.getElementById('nomeCreche').value,
+        cnpj: document.getElementById('cnpjCreche').value,
+        endereco: document.getElementById('enderecoCreche').value,
+        bairro: document.getElementById('bairroCreche').value,
+        telefone: document.getElementById('telefoneCreche').value,
+        email: document.getElementById('emailCreche').value,
+        totalVagas: parseInt(document.getElementById('totalVagasCreche').value),
+        vagasOcupadas: parseInt(document.getElementById('vagasOcupadasCreche').value),
+        observacoes: document.getElementById('observacoesCreche').value
+      };
+      
+      if (this.dataset.id) {
+        // Editar
+        const creche = creches.find(c => c.id === parseInt(this.dataset.id));
+        Object.assign(creche, dadosCreche);
+        alert('Creche atualizada com sucesso!');
+      } else {
+        // Adicionar
+        dadosCreche.id = Date.now();
+        creches.push(dadosCreche);
+        alert('Creche adicionada com sucesso!');
+      }
+      
+      fecharModal('modalCreche');
+      carregarCreches();
+    });
+
+    // Editar creche
+    function editarCreche(id) {
+      abrirModalCreche(id);
+    }
+
+    // Excluir creche
+    function excluirCreche(id) {
+      if (confirm('Tem certeza que deseja excluir esta creche?')) {
+        const index = creches.findIndex(c => c.id === id);
+        creches.splice(index, 1);
+        alert('Creche excluída com sucesso!');
+        carregarCreches();
+      }
+    }
+
+    // Carregar usuários
+    function carregarUsuarios() {
+      const tbody = document.getElementById('listaUsuarios');
+      tbody.innerHTML = '';
+      
+      usuarios.forEach((usuario, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${usuario.nome}</td>
+          <td>${usuario.email}</td>
+          <td>${usuario.cpf}</td>
+          <td>${usuario.telefone}</td>
+          <td>${usuario.dataCadastro}</td>
+          <td><span class="status-${usuario.status === 'ativo' ? 'aprovado' : 'rejeitado'}">${usuario.status.toUpperCase()}</span></td>
+          <td>
+            <button class="action-btn ${usuario.status === 'ativo' ? 'btn-rejeitar' : 'btn-aprovar'}" 
+                    onclick="toggleStatusUsuario(${index})">
+              ${usuario.status === 'ativo' ? '🚫 Desativar' : '✅ Ativar'}
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Toggle status do usuário
+    function toggleStatusUsuario(index) {
+      usuarios[index].status = usuarios[index].status === 'ativo' ? 'inativo' : 'ativo';
+      alert(`Usuário ${usuarios[index].status === 'ativo' ? 'ativado' : 'desativado'} com sucesso!`);
+      carregarUsuarios();
+    }
+
+    // Carregar relatórios
+    function carregarRelatorios() {
+      // Aqui você pode implementar gráficos reais usando bibliotecas como Chart.js
+      console.log('Carregando relatórios...');
+    }
+
+    // Gerar relatório PDF
+    function gerarRelatorio() {
+      alert('Funcionalidade de geração de PDF será implementada.');
+    }
+
+    // Exportar dados CSV
+    function exportarDados() {
+      let csv = 'Protocolo,Nome Aluno,Responsavel,Data Nascimento,Status,Data Submissao\n';
+      matriculas.forEach(m => {
+        csv += `${m.protocolo},${m.nomeAluno},${m.responsavel},${m.dataNascimento},${m.status},${m.dataSubmissao}\n`;
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'matriculas_smesa.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    // Fechar modal
+    function fecharModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Fechar modal ao clicar fora
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+      }
+    }
+
+    // CÓDIGO ORIGINAL MANTIDO
+
+    // Termos
+    const btnProsseguir = document.getElementById('prosseguirMatricula');
+    btnProsseguir.addEventListener('click', function() {
+      const aceite = document.getElementById('aceiteTermos').checked;
+      if (!aceite) {
+        alert('Você precisa aceitar os termos para continuar.');
+        return;
+      }
+      document.getElementById('termosSection').classList.add('hidden');
+      document.getElementById('formMatricula').classList.remove('hidden');
+      // Carregar creches no formulário
+      carregarCreches();
+    });
+
+    // Busca de CEP para cadastro
+    document.getElementById('cepCadastro').addEventListener('blur', function () {
+      let cep = this.value.replace(/\D/g, '');
+      if (cep.length !== 8) {
+        alert('CEP inválido. Deve conter 8 dígitos.');
+        return;
+      }
+      fetch('https://viacep.com.br/ws/' + cep + '/json/')
+        .then(response => response.json())
+        .then(data => {
+          if (data.erro) {
+            alert('CEP não encontrado.');
+          } else {
+            document.getElementById('enderecoCadastro').value = data.logradouro;
+            document.getElementById('bairroCadastro').value = data.bairro;
+            document.getElementById('estadoCadastro').value = 'SP';
+          }
+        })
+        .catch(() => alert('Erro ao buscar o CEP.'));
+    });
+
+    // Busca de CEP para matrícula
+    document.getElementById('cep').addEventListener('blur', function () {
+      let cep = this.value.replace(/\D/g, '');
+      if (cep.length !== 8) {
+        alert('CEP inválido. Deve conter 8 dígitos.');
+        return;
+      }
+      fetch('https://viacep.com.br/ws/' + cep + '/json/')
+        .then(response => response.json())
+        .then(data => {
+          if (data.erro) {
+            alert('CEP não encontrado.');
+          } else {
+            document.getElementById('endereco').value = data.logradouro;
+            document.getElementById('bairro').value = data.bairro;
+            document.getElementById('estado').value = 'SP';
+          }
+        })
+        .catch(() => alert('Erro ao buscar o CEP.'));
+    });
+
+    // Matrícula: Resumo dos dados
+    document.getElementById('formMatricula').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const campos = [
+        'nomeCrianca','dataNascimentoResponsavel','cpfResponsavel','nomeAluno','dataNascimentoAluno','documentoAluno','emailResponsavel','telefone','cep','endereco','numero','complemento','bairro','estado','pcd','descricaoPcd','renda','vulnerabilidade','unidade1','unidade2'
+      ];
+      let resumoHTML = '<ul>';
+      campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.value) {
+          const label = el.previousElementSibling.innerText;
+          resumoHTML += `<li><strong>${label}:</strong> ${el.value}</li>`;
+        }
+      });
+      resumoHTML += '</ul>';
+      document.getElementById('resumoConteudo').innerHTML = resumoHTML;
+      document.getElementById('formMatricula').classList.add('hidden');
+      document.getElementById('resumoRespostas').classList.remove('hidden');
+    });
+
+    // Confirmação
+    document.getElementById('confirmarResumo').addEventListener('click', function() {
+      const protocolo = 'SMESA-' + Date.now();
+      
+      // Adicionar nova matrícula aos dados
+      const novaMatricula = {
+        protocolo: protocolo,
+        nomeAluno: document.getElementById('nomeAluno').value,
+        responsavel: document.getElementById('nomeCrianca').value,
+        dataNascimento: document.getElementById('dataNascimentoAluno').value,
+        unidadePreferencia: document.getElementById('unidade1').value,
+        status: 'pendente',
+        dataSubmissao: new Date().toISOString().split('T')[0],
+        dados: {
+          nomeResponsavel: document.getElementById('nomeCrianca').value,
+          cpfResponsavel: document.getElementById('cpfResponsavel').value,
+          emailResponsavel: document.getElementById('emailResponsavel').value,
+          telefone: document.getElementById('telefone').value,
+          endereco: document.getElementById('endereco').value + ', ' + document.getElementById('numero').value,
+          bairro: document.getElementById('bairro').value,
+          vulnerabilidade: document.getElementById('vulnerabilidade').value,
+          renda: document.getElementById('renda').value
+        }
+      };
+      
+      matriculas.push(novaMatricula);
+      
+      document.getElementById('protocolo').textContent = protocolo;
+      document.getElementById('resumoRespostas').classList.add('hidden');
+      document.getElementById('confirmacao').classList.remove('hidden');
+    });
+
+    // Alternar entre Cadastro e Login
+    document.getElementById('linkCadastro').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('cadastroSection').classList.remove('hidden');
+    });
+
+    document.getElementById('voltarLogin').addEventListener('click', function() {
+      document.getElementById('cadastroSection').classList.add('hidden');
+      document.getElementById('loginSection').classList.remove('hidden');
+    });
+
+    // Cadastro de usuário
+    document.getElementById('formCadastro').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Adicionar novo usuário
+      const novoUsuario = {
+        nome: document.getElementById('nomeCadastro').value,
+        email: document.getElementById('emailCadastro').value,
+        cpf: document.getElementById('cpfCadastro').value,
+        telefone: document.getElementById('telefoneCadastro').value,
+        dataCadastro: new Date().toISOString().split('T')[0],
+        status: 'ativo'
+      };
+      
+      usuarios.push(novoUsuario);
+      
+      alert('Cadastro realizado com sucesso! Faça login para continuar.');
+      document.getElementById('cadastroSection').classList.add('hidden');
+      document.getElementById('loginSection').classList.remove('hidden');
+    });
+
+    // Validação da data de nascimento do responsável
+    document.getElementById('dataNascimentoResponsavel').addEventListener('change', function(){
+      var dateValue = this.value;
+      if(dateValue){
+        var parts = dateValue.split('-'); // Formato: AAAA-MM-DD
+        if(parts.length !== 3){
+          alert('Data inválida. Formato correto: AAAA-MM-DD.');
+          this.value = '';
+          return;
+        }
+        var year = parseInt(parts[0], 10);
+        var month = parseInt(parts[1], 10);
+        var day = parseInt(parts[2], 10);
+        if(month < 1 || month > 12){
+          alert('Mês inválido. Informe um valor entre 1 e 12.');
+          this.value = '';
+          return;
+        }
+        if(day < 1 || day > 31){
+          alert('Dia inválido. Informe um valor entre 1 e 31.');
+          this.value = '';
+          return;
+        }
+      }
+    });
+
+    // Validação dinâmica do documento do aluno (RG ou CPF)
+    document.getElementById('tipoDocumentoAluno').addEventListener('change', function(){
+      var docInput = document.getElementById('documentoAluno');
+      if(this.value === 'CPF'){
+        docInput.placeholder = 'Ex: 12345678901';
+        docInput.pattern = '[0-9]{11}';
+        docInput.maxLength = 11;
+      } else if(this.value === 'RG'){
+        docInput.placeholder = 'Ex: 123456789';
+        docInput.pattern = '[0-9]{9}';
+        docInput.maxLength = 9;
+      } else {
+        docInput.placeholder = 'Informe o documento';
+        docInput.removeAttribute('pattern');
+        docInput.removeAttribute('maxlength');
+      }
+    });
+
+    // Alternar entre Login e Esqueci Minha Senha
+    document.getElementById('linkEsqueciSenha').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('esqueciSenhaSection').classList.remove('hidden');
+    });
+
+    document.getElementById('voltarLoginSenha').addEventListener('click', function() {
+      document.getElementById('esqueciSenhaSection').classList.add('hidden');
+      document.getElementById('loginSection').classList.remove('hidden');
+    });
+
+    // Form esqueci senha
+    document.getElementById('formEsqueciSenha').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Link de recuperação enviado para o e-mail informado!');
+      document.getElementById('esqueciSenhaSection').classList.add('hidden');
+      document.getElementById('loginSection').classList.remove('hidden');
+    });
+
+    // Configurar o "max" para a data de nascimento do aluno para garantir que ele tenha mais de 4 anos
+    function setMaxBirthDateAluno() {
+      var today = new Date();
+      today.setFullYear(today.getFullYear() - 4);
+      var maxDate = today.toISOString().split("T")[0];
+      document.getElementById('dataNascimentoAluno').setAttribute('max', maxDate);
+    }
+    setMaxBirthDateAluno();
+
+    // Inicializar dados ao carregar a página
+    document.addEventListener('DOMContentLoaded', function() {
+      carregarCreches();
+    });
+  </script>
+</body>
+</html>
